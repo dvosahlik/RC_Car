@@ -17,7 +17,9 @@
 char mpu_data_ready = 0;
 
 
-
+/************************************************************************/
+/* initialization function for the TWI periphery used for MPU6050 communication.                                                                     */
+/************************************************************************/
 void initialize_TWI() {
 	
 	pmc_enable_periph_clk(WIRE_INTERFACE_ID);
@@ -50,7 +52,9 @@ void initialize_TWI() {
 }
 
 
-
+/************************************************************************/
+/* initial sequence for configuration of all the used peripheries.                                                                     */
+/************************************************************************/
 char set_up_car()
 {
 	set_up_adc();

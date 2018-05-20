@@ -5,6 +5,9 @@
 #define  ROZVOR 0.5
 #define ROZCHOD 0.2
 
+/************************************************************************/
+/* This whole file is not used. Was used for some tests                                                                     */
+/************************************************************************/
 
 double get_angle(int pwm)
 {

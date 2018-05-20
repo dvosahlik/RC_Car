@@ -4,6 +4,9 @@
 
 #include "RingBuffer.h"
 
+/************************************************************************/
+/* returns TRUE when buffer is full                                                                     */
+/************************************************************************/
 char circBufFull(circBuf_t *c)
 {
 	// next is where head will point to after this write.
@@ -18,7 +21,9 @@ char circBufFull(circBuf_t *c)
 	return 0;  // return success to indicate successful push.
 }
 
-
+/************************************************************************/
+/* pushes next value. If full the last value is overwritten.                                                                     */
+/************************************************************************/
 char circBufPush(circBuf_t *c, int16_t data)
 {
 	// next is where head will point to after this write.
@@ -39,6 +44,9 @@ char circBufPush(circBuf_t *c, int16_t data)
 	return 1;  // return success to indicate successful push.
 }
 
+/************************************************************************/
+/* push in burst mode. If full the last values are overwritten.                                                                     */
+/************************************************************************/
 char circ_buf_push_burst(circBuf_t *c, int16_t* data, int length)
 {
 	// next is where head will point to after this write.
@@ -64,6 +72,9 @@ char circ_buf_push_burst(circBuf_t *c, int16_t* data, int length)
 }
 
 
+/************************************************************************/
+/* pops the last value.                                                                     */
+/************************************************************************/
 char circBufPop(circBuf_t *c, int16_t *data)
 {
 	// if the head isn't ahead of the tail, we don't have any characters
@@ -80,6 +91,9 @@ char circBufPop(circBuf_t *c, int16_t *data)
 	return 1;  // return success to indicate successful push.
 }
 
+/************************************************************************/
+/* reads the value on index. Zero index is on the last value.                                                                     */
+/************************************************************************/
 char circ_buf_on_index(circBuf_t *c, int index, int16_t *data)
 {
 	// if the head isn't ahead of the tail, we don't have any characters

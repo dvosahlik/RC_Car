@@ -28,7 +28,9 @@ uint16_t THROTTLE_DURATION = 1600;
 uint32_t next_test = 0;	
 
 
-
+/************************************************************************/
+/* intialization sequence for the telemetry (USART3)                                                                     */
+/************************************************************************/
 char set_up_telemetry()
 {
 	pmc_enable_periph_clk(ID_USART3);
@@ -42,6 +44,9 @@ char set_up_telemetry()
 	NVIC_EnableIRQ(USART3_IRQn);
 }
 
+/************************************************************************/
+/* Next, there are multiple functions that are setting up some coefficients                                                                    */
+/************************************************************************/
 char set_up_adc_offset()
 {
 	char snumber[15];
@@ -170,6 +175,9 @@ char set_up_ENGINE_R_GAIN()
 	
 }
 
+/************************************************************************/
+/* function that allows printing of the specified subject                                                                     */
+/************************************************************************/
 static char allow_print()
 {
 	char* next = read_buffer;
@@ -217,6 +225,9 @@ static char allow_print()
 	printf("Zakazuji debugovaci zpravy typu %c\n", next[0]);
 }
 
+/************************************************************************/
+/* function for printing the float values                                                                     */
+/************************************************************************/
 void print_float(double val, char *string, char* out_string)
 {
 	char number[20];
@@ -224,6 +235,9 @@ void print_float(double val, char *string, char* out_string)
 	sprintf(out_string, string, number);
 }
 
+/************************************************************************/
+/* sends the telemetry data in *data through the USART periphery                                                                     */
+/************************************************************************/
 void print_telemetry_data(telemetry_data_t* data, int length)
 {
 	if (sending_tel)
@@ -260,7 +274,9 @@ void print_telemetry_data(telemetry_data_t* data, int length)
 
 
 
-
+/************************************************************************/
+/* main function to process the received bytes                                                                     */
+/************************************************************************/
 char check_buffer()
 {
 	if (zpracuj_buffer)

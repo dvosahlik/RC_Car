@@ -21,7 +21,9 @@ void rpm_right_up();
 uint32_t left_count, left_count_new, l_pom_up;
 uint32_t right_count, right_count_new, r_pom_up;
 
-
+/************************************************************************/
+/* ISR for falling edge event on left motor RPM measurement pin                                                                     */
+/************************************************************************/
 void rpm_left_down()
 {
 	if (micros() - l_pom_up >= MIN_ALLOWED_PERIOD/2 && micros() - left_count_new >= MIN_ALLOWED_PERIOD)
@@ -31,6 +33,9 @@ void rpm_left_down()
 	}
 }
 
+/************************************************************************/
+/* ISR for rising edge event on left motor RPM measurement                                                                     */
+/************************************************************************/
 void rpm_left_up()
 {
 	if (micros() - left_count_new >= MIN_ALLOWED_PERIOD/2 && micros() - l_pom_up >= MIN_ALLOWED_PERIOD)
@@ -39,6 +44,9 @@ void rpm_left_up()
 	}
 }
 
+/************************************************************************/
+/* ISR for falling edge event on right motor RPM measurement                                                                     */
+/************************************************************************/
 void rpm_right_down()
 {
 	if (micros() - r_pom_up >= MIN_ALLOWED_PERIOD/2 && micros() - right_count_new >= MIN_ALLOWED_PERIOD)
@@ -48,6 +56,9 @@ void rpm_right_down()
 	}
 }
 
+/************************************************************************/
+/* ISR for rising edge event on right motor RPM measurement                                                                     */
+/************************************************************************/
 void rpm_right_up()
 {
 	if (micros() - right_count_new >= MIN_ALLOWED_PERIOD/2 && micros() - r_pom_up >= MIN_ALLOWED_PERIOD)
@@ -59,6 +70,9 @@ void rpm_right_up()
 
 
 int byl = 0;
+/************************************************************************/
+/* returns the RPS (Revolution per second) for the left motor                                                                     */
+/************************************************************************/
 double get_RPS_left()			//rotation per second
 {
 	double result = (double)1/left_count*(double)1000000;
@@ -68,6 +82,9 @@ double get_RPS_left()			//rotation per second
 		return result;
 }
 
+/************************************************************************/
+/* returns the RPS (Revolution per second) for the right motor                                                                        */
+/************************************************************************/
 double get_RPS_right()			//rotation per second
 {
 	double result = (double)1/right_count*(double)1000000;
@@ -77,7 +94,9 @@ double get_RPS_right()			//rotation per second
 		return result;
 }
 
-
+/************************************************************************/
+/* Initial sequence for setting up the RPM measurements                                                                     */
+/************************************************************************/
 char set_up_RPS()
 {
 			REG_PIOD_PER |= PIO_PER_P1 |PIO_PER_P2 ;				//Enable PIO digitální piny 52 a 53 na Due
@@ -92,7 +111,9 @@ char set_up_RPS()
 			
 }
 
-
+/************************************************************************/
+/* ISR for PIO events                                                                     */
+/************************************************************************/
 void PIOD_Handler(void)
 {
 	uint32_t isr = PIOD->PIO_ISR;

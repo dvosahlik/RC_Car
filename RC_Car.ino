@@ -191,7 +191,9 @@ char gyro_feedback_path_set_up()
 }
 
 
-
+/************************************************************************/
+/* initialization sequence used to configure all the signal paths and peripheries.                                                                     */
+/************************************************************************/
 
 void setup(){
 	
@@ -216,7 +218,9 @@ int count = 0;
 int setted_up = 0;
 
 
-
+/************************************************************************/
+/* used for printing the telemetry data if enabled.                                                                     */
+/************************************************************************/
 char print_tel(double RPM_L, double RPM_R, double velocity, double akcelerometr, double current_left, double current_right, double throttle, double steer, double gyro)
 {
 	telemetry_data_t tel[9];
@@ -267,7 +271,9 @@ static uint32_t throttle_time = 0;
 static int throttle_old = 0;
 
 
-
+/************************************************************************/
+/* The main loop. Used for time unconstrained algorithms such as printing the telemetry                                                                     */
+/************************************************************************/
 void loop(){
 	char changed = 0;
 	unsigned int nextVal = 0;
@@ -309,7 +315,7 @@ void loop(){
 	{
 		printf("otacky vpravo %d\n", RPM_right);
 	}
-	if ((debug_messages.telemtry_data && p_allowed) || (zbyvajici_cas() && p_allowed_fast))
+	if ((debug_messages.telemtry_data && p_allowed) || (remaining_test_time() && p_allowed_fast))
 	{
 		print_tel(RPM_left, RPM_right, vel, accel_y, current_left, current_right, inputs.throttle, inputs.steering, gyro_z);
 	}
@@ -322,13 +328,15 @@ void loop(){
 
 
 
-
+/************************************************************************/
+/* main regulation loop used for time constrained algorithms.                                                                     */
+/************************************************************************/
 void main_loop()
 {
 	uint32_t cas = micros();
 	inputs.throttle = get_throttle();
 	inputs.steering = get_steering();
-	testovaci_vstupy(&inputs);
+	test_inputs(&inputs);
 	get_gyro(&gyro_z);
 	get_accelerometer_x(&accel_x);
 	vel = 0;

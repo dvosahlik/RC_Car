@@ -23,6 +23,9 @@ static uint32_t map_to_one_output(int value, uint8_t scale, char servo)
 	return result;
 }
 
+/************************************************************************/
+/* maps the output to the motors.                                                                     */
+/************************************************************************/
 char map_to_throttle(torque_vector* throttle)
 {
 	throttle->left_wheel = throttle_scale_left/(float)100*throttle->left_wheel;
@@ -33,17 +36,26 @@ char map_to_throttle(torque_vector* throttle)
 	return 1;
 }
 
+/************************************************************************/
+/* maps the output to the servo.                                                                     */
+/************************************************************************/
 char map_to_steering(int steering)
 {
 	STEER_REGISTER = map_to_one_output(steering, steering_scale, 1);
 }
 
+/************************************************************************/
+/* sets up the scales of the output for the motors                                                                     */
+/************************************************************************/
 char scale_throttle_output(uint8_t percent, uint8_t percent_left)
 {
 	throttle_scale = percent;
 	return 1;
 }
 
+/************************************************************************/
+/* seets up the scale of the output for the servo.                                                                 */
+/************************************************************************/
 char scale_steering_output(uint8_t percent)
 {
 	steering_scale = percent;

@@ -9,7 +9,10 @@
 int16_t throttle_old;
 uint32_t throttle_time;
 
-uint32_t zbyvajici_cas()
+/************************************************************************/
+/* returns the remaining drive test time. The unit is in drive test if greater then 0                                                                     */
+/************************************************************************/
+uint32_t remaining_test_time()
 {
 	if(throttle_old != throttle_in)
 	{
@@ -23,10 +26,12 @@ uint32_t zbyvajici_cas()
 	return 0;
 }
 
-
-char zataceni(inputs_t* inputs)
+/************************************************************************/
+/* get inputs for the steering test.                                                                     */
+/************************************************************************/
+char steering_test(inputs_t* inputs)
 {
-	uint32_t cas = zbyvajici_cas();
+	uint32_t cas = remaining_test_time();
 	if (cas)
 	{
 		double procento = cas*(double)100/THROTTLE_DURATION;
@@ -41,9 +46,12 @@ char zataceni(inputs_t* inputs)
 	}
 }
 
-char akcelerace(inputs_t* inputs)
+/************************************************************************/
+/* returns the inputs for the acceleration tests                                                                     */
+/************************************************************************/
+char acceleration_test(inputs_t* inputs)
 {
-	uint32_t cas = zbyvajici_cas();
+	uint32_t cas = remaining_test_time();
 	if (cas)
 	{
 		double procento = cas*(double)100/THROTTLE_DURATION;
@@ -55,9 +63,12 @@ char akcelerace(inputs_t* inputs)
 	}
 }
 
-char klickovani(inputs_t* inputs)
+/************************************************************************/
+/* returns the inputs fo the looping tests.                                                                     */
+/************************************************************************/
+char looping_test(inputs_t* inputs)
 {
-	uint32_t cas = zbyvajici_cas();
+	uint32_t cas = remaining_test_time();
 	if (cas)
 	{
 		inputs->throttle = throttle_in;
@@ -85,19 +96,22 @@ char klickovani(inputs_t* inputs)
 	}
 }
 
-char testovaci_vstupy(inputs_t* inputs)
+/************************************************************************/
+/* returns the test inputs when in test mode.                                                                     */
+/************************************************************************/
+char test_inputs(inputs_t* inputs)
 {
 	char testy = next_test % 3;
 	switch (testy)
 	{
 		case 0 :
-			akcelerace(inputs);
+			acceleration_test(inputs);
 		break;
 		case 1:
-			zataceni(inputs);
+			steering_test(inputs);
 		break;
 		case 2:
-			klickovani(inputs);
+			looping_test(inputs);
 		break;
 	}
 }

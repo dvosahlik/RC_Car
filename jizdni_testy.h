@@ -14,8 +14,8 @@ typedef struct {
 	int16_t steering;
 	} inputs_t;
 
-char testovaci_vstupy(inputs_t* inputs);
-uint32_t zbyvajici_cas();
+char test_inputs(inputs_t* inputs);
+uint32_t remaining_test_time();
 
 #endif
 

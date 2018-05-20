@@ -42,6 +42,9 @@ serial_signal_path_t input_filter;
 
 char register_filter();
 
+/************************************************************************/
+/* ISR for rising edge of steering input pin                                                                     */
+/************************************************************************/
 void SteerUpOccured()
 {
 	attachInterrupt(STEERING_INPUT_PIN, SteerDownOccured, FALLING);
@@ -49,6 +52,10 @@ void SteerUpOccured()
 	steerCountNew = micros();
 }
 
+
+/************************************************************************/
+/* ISR for falling edge of steering input pin                                                                     */
+/************************************************************************/
 void SteerDownOccured()
 {
 	steerCount = micros() - steerCountNew;
@@ -69,6 +76,9 @@ void SteerDownOccured()
 	steerUp = 1;
 }
 
+/************************************************************************/
+/* ISR for rising edge of motor input pin.                                                                     */
+/************************************************************************/
 void ThrotleUpOccured()
 {
 	attachInterrupt(THROTTLE_INPUT_PIN, ThrotleDownOccured, FALLING);
@@ -76,6 +86,9 @@ void ThrotleUpOccured()
 	throtleCountNew = micros();
 }
 
+/************************************************************************/
+/* ISR for falling edge of motor input pin.                                                                     */
+/************************************************************************/
 void ThrotleDownOccured()
 {
 	attachInterrupt(THROTTLE_INPUT_PIN, ThrotleUpOccured, RISING);
@@ -97,6 +110,9 @@ void ThrotleDownOccured()
 }
 
 
+/************************************************************************/
+/* initial configuration sequence for the input pins.                                                                     */
+/************************************************************************/
 char set_up_inputs()
 {
 	throtleUp = 0;
@@ -110,6 +126,9 @@ char set_up_inputs()
 	//register_filter();
 }
 
+/************************************************************************/
+/* trimming sequence for the motor input.                                                                     */
+/************************************************************************/
 char trimm_throttle()
 {
 	if (throttle_trimmed == TRIMM_DATA_LENGTH && stred_vstupniho_signalu_motor == 0)
@@ -124,6 +143,9 @@ char trimm_throttle()
 	}
 }
 
+/************************************************************************/
+/* trimming sequence for the steering.                                                                     */
+/************************************************************************/
 char trimm_steering()
 {
 	if (servo_trimmed == TRIMM_DATA_LENGTH && stred_vstupniho_signalu_servo == 0)
@@ -138,6 +160,9 @@ char trimm_steering()
 	}
 }
 
+/************************************************************************/
+/* returns the last motor input value in us.                                                                     */
+/************************************************************************/
 int get_throttle()
 {
 	trimm_throttle();
@@ -162,7 +187,9 @@ int get_throttle()
 }
 
 
-
+/************************************************************************/
+/* low pass filter used to experiment with the input data.                                                                     */
+/************************************************************************/
 char register_filter()
 {
 	z_function* discrete = (z_function*) malloc(sizeof(z_function));
@@ -186,6 +213,9 @@ char register_filter()
 static int output_steering = 0;
 static uint32_t time_micro = 0;
 
+/************************************************************************/
+/* returns the last value of steering input (in us).                                                                     */
+/************************************************************************/
 int get_steering()
 {
 	trimm_steering();

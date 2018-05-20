@@ -13,7 +13,9 @@ typedef struct {
 	
 
 
-
+/************************************************************************/
+/* function the returns the result of a*b which are polynomials                                                                     */
+/************************************************************************/
 char multiply_polynom(double*a, int size_a, double*b, int size_b, double* res, int* size_res)
 {
 	*size_res = size_a*size_b;
@@ -30,6 +32,9 @@ char multiply_polynom(double*a, int size_a, double*b, int size_b, double* res, i
 	}
 }
 
+/************************************************************************/
+/* not used. Intended to use for conversion from the continuous transfer function to the discrete one.                                                                  */
+/************************************************************************/
 char do_the_polynomial_coeffs(double *original, int original_size, double*next, double* multiply_with, int multiply_with_size, double** result, int* result_sizes, 
 double Ts)
 {
@@ -64,6 +69,9 @@ double Ts)
 	}
 }
 
+/************************************************************************/
+/* not used. Intended to use for conversion from the continuous world to the discrete one.                                                                     */
+/************************************************************************/
 char convert_to_discrete_tf(s_function* fce, z_function* disc, double Ts)
 {
 	double* multiply_with = (double*)calloc(sizeof(double), fce->denominator_size*fce->nominator_size);
@@ -132,6 +140,9 @@ char convert_to_discrete_tf(s_function* fce, z_function* disc, double Ts)
 	free(denominator_new_sizes);
 }
 
+/************************************************************************/
+/* shifts the data in a buffer *data. Throws out the last value and shifts all the others by one.                                                                     */
+/************************************************************************/
 char shift_data(double* data, int size)
 {
 	double tmp = data[0];
@@ -144,6 +155,9 @@ char shift_data(double* data, int size)
 	}
 }
 
+/************************************************************************/
+/* returns the output of the discrete transfer function.                                                                     */
+/************************************************************************/
 double tf_output(double input, signal_block* block)
 {
 	tf_data_t* data = (tf_data_t*)(block->pointer_on_data);
@@ -164,6 +178,9 @@ double tf_output(double input, signal_block* block)
 	return y;
 }
 
+/************************************************************************/
+/* Constructor of the z-function. Returns the specified discrete transfer function as a signal block.                                                                     */
+/************************************************************************/
 char Transfer_function(z_function* fce, signal_block* block)
 {
 	//convert_to_discrete_tf(fce, discrete, Ts);

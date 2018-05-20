@@ -6,7 +6,9 @@
 #include "Arduino.h"
 #include <string.h>
 
-
+/************************************************************************/
+/* sends char via USART3 and PDC periphery                                                                     */
+/************************************************************************/
 char send_char(char to_send)
 {
 	while ((USART3->US_CSR & US_CSR_TXRDY) != US_CSR_TXRDY);
@@ -16,12 +18,17 @@ char (*read_done)(char*, int) = NULL;
 
 char (*send_done)() = NULL;
 
-
+/************************************************************************/
+/* function to set up the callback function which is called when the transmition is done                                                                     */
+/************************************************************************/
 char register_send_done(char (*callback)())
 {
 	send_done = callback;
 }
 
+/************************************************************************/
+/* function to send multiple chars via USART3                                                                     */
+/************************************************************************/
 char send_bytes(char* ptr, int length)
 {
 	for (int i = 0; i < length;i++)
@@ -35,6 +42,9 @@ volatile char* buffer[128];
 char read_buffer[50];
 int read_index = -1;
 
+/************************************************************************/
+/* send bytes on USART3 via PDC channel                                                                     */
+/************************************************************************/
 char send_bytes_DMA(char* ptr, int length)
 {
 	if (sending_tel)
@@ -56,6 +66,9 @@ char send_bytes_DMA(char* ptr, int length)
 
 volatile char receiving = 0;
 
+/************************************************************************/
+/* function which sets up the callback when the reception is done                                                                     */
+/************************************************************************/
 char register_read_done(char (*callback)(char*, int))
 {
 	read_done = callback;
@@ -67,6 +80,9 @@ char zpracuj_buffer = 0;
 char *ptr_read = read_buffer;
 int length_read = 1;
 
+/************************************************************************/
+/* function to read multiple bytes via USART3 and PDC                                                                     */
+/************************************************************************/
 char read_bytes_DMA(char* ptr, int length)
 {
 	if (receiving == 1)
@@ -84,6 +100,9 @@ char read_bytes_DMA(char* ptr, int length)
 
 static char read_first = 1;
 
+/************************************************************************/
+/* generic ISR for USART3                                                                     */
+/************************************************************************/
 void USART3_Handler(void)
 {
 	int32_t cs = USART3->US_CSR;

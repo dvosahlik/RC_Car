@@ -40,6 +40,9 @@ char imu_working()
 	return twi_working;
 }
 
+/************************************************************************/
+/* I2C write setup using PDC. TWI_MasterModeWrite has to be called before this function.                                                                  */
+/************************************************************************/
 static inline void TWI_PDCWrite(uint8_t *data, uint16_t count) {
 	WIRE_INTERFACE->TWI_PTCR = TWI_PTCR_RXTDIS | TWI_PTCR_TXTDIS;
 	WIRE_INTERFACE->TWI_TPR = (uint32_t)data;
@@ -47,6 +50,10 @@ static inline void TWI_PDCWrite(uint8_t *data, uint16_t count) {
 	WIRE_INTERFACE->TWI_TNPR = 0;
 	WIRE_INTERFACE->TWI_TNCR = 0;
 }
+
+/************************************************************************/
+/* I2C read setup using PDC. TWI_MasterModeRead has to be called before this function.                                                           */
+/************************************************************************/
 static inline void TWI_PDCRead(uint8_t *data, uint16_t count) {
 	WIRE_INTERFACE->TWI_PTCR = TWI_PTCR_RXTDIS | TWI_PTCR_TXTDIS;
 	WIRE_INTERFACE->TWI_RPR = (uint32_t)data;
@@ -55,29 +62,45 @@ static inline void TWI_PDCRead(uint8_t *data, uint16_t count) {
 	WIRE_INTERFACE->TWI_RNCR = 0;
 }
 
+/************************************************************************/
+/* initalizes I2C master mode write.                                                                     */
+/************************************************************************/
 static inline void TWI_MasterModeWrite(uint8_t deviceAddress, uint8_t reg) {
 	WIRE_INTERFACE->TWI_MMR = TWI_MMR_IADRSZ_1_BYTE | TWI_MMR_DADR(deviceAddress);
 	WIRE_INTERFACE->TWI_IADR = reg;
 	WIRE_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS;
 }
+
+/************************************************************************/
+/* initializes I2C master mode read.                                                                     */
+/************************************************************************/
 static inline void TWI_MasterModeRead(uint8_t deviceAddress, uint8_t reg) {
 	WIRE_INTERFACE->TWI_MMR = TWI_MMR_IADRSZ_1_BYTE | TWI_MMR_DADR(deviceAddress) | TWI_MMR_MREAD;
 	WIRE_INTERFACE->TWI_IADR = reg;
 	WIRE_INTERFACE->TWI_CR = TWI_CR_MSEN | TWI_CR_SVDIS;
 }
 
+/************************************************************************/
+/* Start of the PDC write which was set up in TWI_PDCWrite                                                               */
+/************************************************************************/
 static inline void TWI_Write() {
 	WIRE_INTERFACE->TWI_IER = TWI_IER_ENDTX;	
 	//WIRE_INTERFACE->TWI_CR = TWI_CR_START;
 	WIRE_INTERFACE->TWI_PTCR = TWI_PTCR_TXTEN;
 }
+
+/************************************************************************/
+/* Start of the PDC read which was set up in TWI_PDCRead                                                                       */
+/************************************************************************/
 static inline void TWI_Read() {
 	WIRE_INTERFACE->TWI_IER = TWI_IER_ENDRX;
 	WIRE_INTERFACE->TWI_CR = TWI_CR_START;
 	WIRE_INTERFACE->TWI_PTCR = TWI_PTCR_RXTEN;
 }
 
-
+/************************************************************************/
+/* function that writes *data onto specified register reg in MPU6050 unit                                                                     */
+/************************************************************************/
 char IMU_write(uint8_t reg, uint8_t *data, uint16_t count) {
 	if (twi_working)
 		return 0;
@@ -88,6 +111,9 @@ char IMU_write(uint8_t reg, uint8_t *data, uint16_t count) {
 	return 1;
 }
 
+/************************************************************************/
+/* Writes byte on MPU6050 in blocking mode                                                                     */
+/************************************************************************/
 char IMU_write_byte(uint8_t reg, uint8_t value)
 {
 	WIRE_INTERFACE->TWI_MMR = TWI_MMR_IADRSZ_1_BYTE | TWI_MMR_DADR(MPU_ADDRR);
@@ -99,12 +125,18 @@ char IMU_write_byte(uint8_t reg, uint8_t value)
 	while ((WIRE_INTERFACE->TWI_SR & TWI_SR_TXCOMP) != TWI_SR_TXCOMP);
 }
 
+/************************************************************************/
+/* writes 16 bits on MPU6050 in blocking mode.                                                               */
+/************************************************************************/
 char IMU_write_byte16(uint8_t reg, int16_t value)
 {
 	IMU_write_byte(reg, ((value & 0xFF00) >> 8));
 	IMU_write_byte((reg + 1), (value & 0xFF));
 }
 
+/************************************************************************/
+/* writes the only one specified bit on MPU6050. Used in initialization sequence.                                                                     */
+/************************************************************************/
 char IMU_write_bit(uint8_t reg, uint8_t bit, uint8_t length, uint8_t value) {
 	uint8_t write;
 	IMU_read_reg(reg, &write, 1);
@@ -117,16 +149,15 @@ char IMU_write_bit(uint8_t reg, uint8_t bit, uint8_t length, uint8_t value) {
 	IMU_write_byte(reg, write);
 }
 
-char IMU_write_blocking(uint8_t reg, uint8_t *data, uint16_t count) {
-	while(!IMU_write(reg, data, count));
-	while(twi_working)
-	{
-	}
-}
+
 
 
 uint8_t* read_data;
 uint16_t read_data_count;
+
+/************************************************************************/
+/* starts the read of the MPU6050 register(s) through the I2C with use of PDC periphery.                                                                */
+/************************************************************************/
 char IMU_read_reg(uint8_t addr, uint8_t *data, uint16_t count) {
 	if (twi_working)
 		return 0;
@@ -141,6 +172,9 @@ char IMU_read_reg(uint8_t addr, uint8_t *data, uint16_t count) {
 
 char read_index_IMU = 0;
 
+/************************************************************************/
+/* after the end of the read invokes next read.                                                                     */
+/************************************************************************/
 char IMU_read_next()
 {
 	switch (read_index_IMU)
@@ -158,19 +192,21 @@ char IMU_read_next()
 
 
 
-void onTransmitCmpltCallback(void)
-{
-	
-}
 
 uint32_t last_time_acceleration = 0;
 
+/************************************************************************/
+/* reads the last byte stored in the read register of TWI periphery                                                                     */
+/************************************************************************/
 void onReceiveCmpltCallback(uint8_t last_value)
 {
 	read_data[read_data_count - 1] = last_value;
 }
 
 
+/************************************************************************/
+/* ISR routine for TWI periphery.                                                                     */
+/************************************************************************/
 void TWI1_Handler() 
 {
 	uint32_t sr = WIRE_INTERFACE->TWI_SR;
@@ -196,8 +232,6 @@ void TWI1_Handler()
 	
 	if ((sr & TWI_SR_ENDTX) == TWI_SR_ENDTX)
 	{
-		if (onTransmitCmpltCallback)
-		onTransmitCmpltCallback();
 	}
 	twi_working = 0;
 }
@@ -206,12 +240,18 @@ int16_t accel_y_offset = 0;
 int16_t accel_x_offset = 0;
 int16_t gyro_z_offset = 0;
 
+/************************************************************************/
+/* returns the last accelerometer value i x axis                                                                     */
+/************************************************************************/
 char get_accelerometer_x(volatile int16_t* x)
 {
 	*x = (((int16_t)buffer_out[2]) << 8) | buffer_out[3];
 	*x -= accel_x_offset;
 }
 
+/************************************************************************/
+/* returns the last accelerometer value in y axis                                                                     */
+/************************************************************************/
 char get_accelerometer(volatile int16_t* y)
 {
 	*y = (((int16_t)buffer_out[4]) << 8) | buffer_out[5];
@@ -222,6 +262,9 @@ double vel_old = 0;
 int16_t accel_old = 0;
 uint32_t micros_velocity = 0;
 
+/************************************************************************/
+/* function that registers the lowpass filter used for filtering the gyro data.                                                                     */
+/************************************************************************/
 char register_low_pass(serial_signal_path_t* fb)
 {
 	z_function* discrete = (z_function*) malloc(sizeof(z_function));
@@ -244,6 +287,9 @@ char register_low_pass(serial_signal_path_t* fb)
 	register_member(low_pass, fb);
 }
 
+/************************************************************************/
+/* obsolete. Used for high pass filtering of the accelerometer data.                                                                     */
+/************************************************************************/
 char register_high_pass(serial_signal_path_t* fb)
 {
 	z_function* discrete = (z_function*) malloc(sizeof(z_function));
@@ -264,12 +310,19 @@ char register_high_pass(serial_signal_path_t* fb)
 	register_member(low_pass, fb);
 }
 
+
+/************************************************************************/
+/* registers the lowpass filter for specified path.                                                                     */
+/************************************************************************/
 char IMU_filter(serial_signal_path_t* path)
 {
 	register_low_pass(path);
 	//register_high_pass(path);
 }
 
+/************************************************************************/
+/* Obsolete. Used for measuring the inertial velocity which turned out to be too much noisy.                                                                     */
+/************************************************************************/
 char IMU_get_velocity(volatile double *velocity, int16_t accel)
 {
 	*velocity = 0;
@@ -288,6 +341,9 @@ char IMU_get_velocity(volatile double *velocity, int16_t accel)
 	return 1;
 }
 
+/************************************************************************/
+/* returns the last gyroscope measured data in axis z.                                                                     */
+/************************************************************************/
 char get_gyro(volatile int16_t* z)
 {
 	*z = (((int16_t)buffer_out[0]) << 8) | buffer_out[1];
@@ -295,6 +351,9 @@ char get_gyro(volatile int16_t* z)
 }
 
 
+/************************************************************************/
+/* initial calibration sequence of MPU6050 used to determine the offset values for the accelerometers and gyros.                                                                     */
+/************************************************************************/
 char imu_calibrate()
 {
 	uint8_t cal_buff[14];

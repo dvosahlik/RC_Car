@@ -10,7 +10,9 @@
 #define SIGNAL_PATH_INCREMENT 2
 
 
-
+/************************************************************************/
+/* registers signal block into the signal path                                                                     */
+/************************************************************************/
 char register_member(signal_block* member, serial_signal_path_t* path)
 {
 	if (path->size == 0)
@@ -27,6 +29,9 @@ char register_member(signal_block* member, serial_signal_path_t* path)
 	(path->size_used) = path->size_used + 1;
 }
 
+/************************************************************************/
+/* returns the output of the signal path                                                                     */
+/************************************************************************/
 double get_output(double input, serial_signal_path_t* path)
 {
 	double result = input;

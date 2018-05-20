@@ -8,12 +8,18 @@
 
 void (*callback_loop)(void);
 
+/************************************************************************/
+/* restarts the TC periphery                                                                     */
+/************************************************************************/
 char restart_timer()
 {
 	TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN | TC_CCR_SWTRG;
 	TC0->TC_CHANNEL[0].TC_CCR = TC_CCR_CLKEN;
 }
 
+/************************************************************************/
+/* Initial sequence configuring the TC periphery.                                                                     */
+/************************************************************************/
 char set_up_timer(void (*loop)(void))
 {
 	callback_loop = loop;
@@ -31,7 +37,9 @@ char set_up_timer(void (*loop)(void))
 
 
 
-
+/************************************************************************/
+/* ISR for the TC periphery                                                                     */
+/************************************************************************/
 void TC0_Handler(void)
 {
 	REG_TC0_SR0;
